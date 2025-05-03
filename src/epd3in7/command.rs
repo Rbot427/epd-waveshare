@@ -46,6 +46,8 @@ pub(crate) enum Command {
     DisplayUpdateSequenceSetting = 0x22,
     /// This command will transfer its data to B/W RAM, until another command is written
     WriteRam = 0x24,
+    /// This command will transfer its data to register 0x26, until another command is written
+    WriteRam2 = 0x26,
     /// This command writes VCOM register from MCU interface
     WriteVcomRegister = 0x2C,
     /// This command writes LUT register from MCU interface (105 bytes),
@@ -61,6 +63,8 @@ pub(crate) enum Command {
     SetRamYAddressStartEndPosition = 0x45,
     AutoWriteRedRamRegularPattern = 0x46,
     AutoWriteBwRamRegularPattern = 0x47,
+    /// This command is undocumented in the specification but used in the example code
+    Unknown = 0x49,
     /// This command makes the initial settings for the RAM X address in the address counter (AC)
     SetRamXAddressCounter = 0x4E,
     /// This command makes the initial settings for the RAM Y address in the address counter (AC)

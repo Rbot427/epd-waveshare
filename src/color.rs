@@ -3,6 +3,8 @@
 //! EPD representation of multicolor with separate buffers
 //! for each bit makes it hard to properly represent colors here
 
+use core::default;
+
 #[cfg(feature = "graphics")]
 use embedded_graphics_core::pixelcolor::BinaryColor;
 #[cfg(feature = "graphics")]
@@ -44,6 +46,20 @@ pub enum TriColor {
     White,
     /// Chromatic color
     Chromatic,
+}
+
+/// For the 4 Color Grayscale Displays
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum GrayColor {
+  /// Black color
+  Black,
+  /// Dark gray color
+  DarkGray,
+  /// Light gray color
+  LightGray,
+  /// White color
+  #[default]
+  White,
 }
 
 /// For the 7 Color Displays
@@ -121,6 +137,20 @@ impl ColorType for TriColor {
             ),
         }
     }
+}
+
+impl ColorType for GrayColor {
+  const BITS_PER_PIXEL_PER_BUFFER: usize = 1;
+  const BUFFER_COUNT: usize = 2;
+  fn bitmask(&self, _bwrbit: bool, pos: u32) -> (u8, u16) {
+      let bit = 0x80 >> (pos % 8);
+      match self {
+        GrayColor::Black => (!bit, 0u16),
+        GrayColor::DarkGray => (!bit, bit as u16),
+        GrayColor::LightGray => (!bit, (bit as u16) << 8),
+        GrayColor::White => (!bit, (bit as u16) << 8 | bit as u16),
+      }
+  }
 }
 
 impl ColorType for OctColor {
