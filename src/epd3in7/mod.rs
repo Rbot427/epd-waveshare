@@ -43,6 +43,7 @@ pub type Display3in7 = crate::graphics::Display<
 >;
 
 /// Display with Fullsize buffer for use with the 3in7 EPD grayscale
+#[cfg(feature = "graphics")]
 pub type Display3in7G = crate::graphics::Display<
     WIDTH,
     HEIGHT,

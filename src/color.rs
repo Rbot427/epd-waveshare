@@ -518,6 +518,11 @@ impl From<TriColor> for embedded_graphics_core::pixelcolor::Rgb888 {
     }
 }
 
+#[cfg(feature = "graphics")]
+impl PixelColor for GrayColor {
+  type Raw = ();
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
