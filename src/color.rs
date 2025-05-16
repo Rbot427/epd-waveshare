@@ -3,12 +3,12 @@
 //! EPD representation of multicolor with separate buffers
 //! for each bit makes it hard to properly represent colors here
 
-use core::default;
-
 #[cfg(feature = "graphics")]
 use embedded_graphics_core::pixelcolor::BinaryColor;
 #[cfg(feature = "graphics")]
 use embedded_graphics_core::pixelcolor::PixelColor;
+use embedded_graphics_core::prelude::GrayColor;
+use embedded_graphics_core::prelude::RawData;
 
 /// When trying to parse u8 to one of the color types
 #[derive(Debug, PartialEq, Eq)]
@@ -50,7 +50,7 @@ pub enum TriColor {
 
 /// For the 4 Color Grayscale Displays
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
-pub enum GrayColor {
+pub enum GrayColor4 {
   /// Black color
   Black,
   /// Dark gray color
@@ -139,16 +139,16 @@ impl ColorType for TriColor {
     }
 }
 
-impl ColorType for GrayColor {
+impl ColorType for GrayColor4 {
   const BITS_PER_PIXEL_PER_BUFFER: usize = 1;
   const BUFFER_COUNT: usize = 2;
   fn bitmask(&self, _bwrbit: bool, pos: u32) -> (u8, u16) {
       let bit = 0x80 >> (pos % 8);
       match self {
-        GrayColor::Black => (!bit, 0u16),
-        GrayColor::DarkGray => (!bit, bit as u16),
-        GrayColor::LightGray => (!bit, (bit as u16) << 8),
-        GrayColor::White => (!bit, (bit as u16) << 8 | bit as u16),
+        GrayColor4::Black => (!bit, 0u16),
+        GrayColor4::DarkGray => (!bit, bit as u16),
+        GrayColor4::LightGray => (!bit, (bit as u16) << 8),
+        GrayColor4::White => (!bit, (bit as u16) << 8 | bit as u16),
       }
   }
 }
@@ -519,8 +519,45 @@ impl From<TriColor> for embedded_graphics_core::pixelcolor::Rgb888 {
 }
 
 #[cfg(feature = "graphics")]
-impl PixelColor for GrayColor {
-  type Raw = ();
+impl PixelColor for GrayColor4 {
+  type Raw = embedded_graphics_core::pixelcolor::raw::RawU2;
+}
+
+#[cfg(feature = "graphics")]
+impl From<embedded_graphics_core::pixelcolor::Rgb888> for GrayColor4 {
+  fn from(rgb: embedded_graphics_core::pixelcolor::Rgb888) -> Self {
+    let gray8 = embedded_graphics_core::pixelcolor::Gray8::from(rgb);
+    match gray8.luma() / (u8::MAX / 4) {
+      0 => GrayColor4::Black,
+      1 => GrayColor4::DarkGray,
+      2 => GrayColor4::LightGray,
+      _ => GrayColor4::White
+    }
+  }
+}
+
+#[cfg(feature = "graphics")]
+impl From<embedded_graphics_core::pixelcolor::raw::RawU2> for GrayColor4 {
+  fn from(raw: embedded_graphics_core::pixelcolor::raw::RawU2) -> Self {
+    match raw.into_inner() {
+      0b00 => GrayColor4::Black,
+      0b01 => GrayColor4::DarkGray,
+      0b10 => GrayColor4::LightGray,
+      _ => GrayColor4::White,
+    }
+  }
+}
+
+#[cfg(feature = "graphics")]
+impl From<GrayColor4> for embedded_graphics_core::pixelcolor::raw::RawU2 {
+  fn from(gray: GrayColor4) -> Self {
+    match gray {
+      GrayColor4::Black => Self::new(0b00),
+      GrayColor4::DarkGray => Self::new(0b01),
+      GrayColor4::LightGray => Self::new(0b10),
+      GrayColor4::White => Self::new(0b11),
+    }
+  }
 }
 
 #[cfg(test)]

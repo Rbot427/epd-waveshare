@@ -14,7 +14,7 @@ mod constants;
 use self::command::Command;
 use self::constants::*;
 
-use crate::{buffer_len, color::{ColorType, GrayColor}};
+use crate::{buffer_len, color::GrayColor4};
 use crate::color::Color;
 use crate::interface::DisplayInterface;
 use crate::traits::{InternalWiAdditions, RefreshLut, WaveshareDisplay};
@@ -49,7 +49,7 @@ pub type Display3in7G = crate::graphics::Display<
     HEIGHT,
     false,
     { buffer_len(WIDTH as usize, HEIGHT as usize * 2)},
-    GrayColor,
+    GrayColor4,
 >;
 
 /// EPD3in7 driver
@@ -445,7 +445,9 @@ where
         width: u32,
         height: u32,
     ) -> Result<(), SPI::Error> {
-        todo!()
+        assert!(buffer.len() == buffer_len(WIDTH as usize, 2 * HEIGHT as usize));
+        assert!(x < WIDTH && y < HEIGHT && x + width < WIDTH && y + height < HEIGHT);
+        Ok(())
     }
 
     fn display_frame(&mut self, spi: &mut SPI, delay: &mut DELAY) -> Result<(), SPI::Error> {
