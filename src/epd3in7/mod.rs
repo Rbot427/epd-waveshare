@@ -385,10 +385,7 @@ where
     }
 
     fn sleep(&mut self, spi: &mut SPI, _delay: &mut DELAY) -> Result<(), SPI::Error> {
-        self.interface.cmd_with_data(spi, Command::Sleep, &[0xF7])?;
-        self.interface.cmd(spi, Command::PowerOff)?;
-        self.interface
-            .cmd_with_data(spi, Command::Sleep2, &[0xA5])?;
+        self.interface.cmd_with_data(spi, Command::DeepSleep, &[0x03])?;
         Ok(())
     }
 
